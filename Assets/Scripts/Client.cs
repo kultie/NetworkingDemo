@@ -91,7 +91,7 @@ public class Client : MonoBehaviour
 
         foreach (var i in entities.Values)
         {
-            i.Render();
+            i.RenderClient();
         }
     }
 
@@ -114,10 +114,13 @@ public class Client : MonoBehaviour
                 }
                 var entity = entities[state.GetInt("entity_id")];
                 var pos = state.GetFloatArray("position");
+                var velocity = state.GetFloatArray("velocity");
                 Vector2 servPos = new Vector2(pos[0], pos[1]);
+                Vector2 servVel = new Vector2(velocity[0], velocity[1]);
                 if (state.GetInt("entity_id") == entityID)
                 {
                     entity.ApplyPosition(servPos);
+                    entity.ApplyVelocity(servVel);
                     if (reconciliation)
                     {
                         var j = 0;
@@ -130,7 +133,7 @@ public class Client : MonoBehaviour
                             }
                             else
                             {
-                                entity.ApplyInput(input);
+                                entity.ApplyInputClient(input);
                                 j++;
                             }
                         }
@@ -187,6 +190,10 @@ public class Client : MonoBehaviour
             NetInput i = new NetInput(entityID, seq, dir);
             Network.SendClientMessage(lag, input);
             pendingInputs.Add(i);
+            if (prediction)
+            {
+                entities[entityID].ApplyInputClient(i);
+            }
         }
     }
 

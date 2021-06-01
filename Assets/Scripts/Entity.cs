@@ -10,9 +10,20 @@ public class Entity : MonoBehaviour
     float speed = 2;
     public List<PositionBufferElement> positionBuffers = new List<PositionBufferElement>();
     Vector2 position;
+    public Vector2 currentPos => position;
+    public Vector2 velocity;
     public void ApplyInput(NetInput input)
     {
-        position.x += input.direction * speed;
+        velocity.x += (input.direction * speed * Time.deltaTime);
+        //position.x = position.x + velocity.x * Time.deltaTime;
+
+    }
+
+    public void ApplyInputClient(NetInput input)
+    {
+        velocity.x += (input.direction * speed * Time.deltaTime);
+        position.x = position.x + velocity.x * Time.deltaTime;
+
     }
 
     internal void AddPositionBuffer(long ts, Vector2 servPos)
@@ -23,6 +34,10 @@ public class Entity : MonoBehaviour
             position = servPos
         });
     }
+    internal void ApplyVelocity(Vector2 velocity)
+    {
+        this.velocity = velocity;
+    }
 
     internal void ApplyPosition(Vector2 servPos)
     {
@@ -30,7 +45,16 @@ public class Entity : MonoBehaviour
     }
     public void Render()
     {
+        position.x = position.x + velocity.x * Time.deltaTime;
         transform.position = position;
+        velocity = velocity - (0.9f * Time.deltaTime) * velocity;
+    }
+
+    public void RenderClient()
+    {
+        //position.x = position.x + velocity.x * Time.deltaTime;
+        transform.position = position;
+        velocity = velocity - (0.9f * Time.deltaTime) * velocity;
     }
 
     internal void Setup(SFSObject entityData)
@@ -39,6 +63,8 @@ public class Entity : MonoBehaviour
         ApplyPosition(new Vector2(pos[0], pos[1]));
         Render();
     }
+
+
 }
 
 public class PositionBufferElement

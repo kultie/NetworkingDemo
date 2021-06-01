@@ -102,7 +102,8 @@ public class Server : MonoBehaviour
         {
             SFSObject _d = new SFSObject();
             _d.PutInt("entity_id", e.Key);
-            _d.PutFloatArray("position", new float[] { e.Value.transform.position.x, e.Value.transform.position.y });
+            _d.PutFloatArray("position", new float[] { e.Value.currentPos.x, e.Value.currentPos.y });
+            _d.PutFloatArray("velocity", new float[] { e.Value.velocity.x, e.Value.velocity.y });
             if (lastProcessInput.ContainsKey(e.Key))
             {
                 _d.PutInt("last_input", lastProcessInput[e.Key]);
@@ -128,6 +129,7 @@ public class Server : MonoBehaviour
             var direction = message.payload.GetFloat("direction");
             NetInput input = new NetInput(id, seq, direction);
             entities[id].ApplyInput(input);
+            Debug.Log(seq);
             lastProcessInput[id] = seq;
         }
     }
